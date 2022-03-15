@@ -4,6 +4,25 @@
 
 const { program, Argument } = require("commander");
 
+const { toggleLightOnCommand, connectCommand } = require("./commands");
+
+program
+	.command("connect")
+	.description("Configure CLI connection to Hue Bright")
+	.action(connectCommand);
+
+program
+	.command("on")
+	.addArgument(new Argument("[all]", "turn on all lights"))
+	.description("Turn on selected light")
+	.action((all) => toggleLightOnCommand(true, all));
+
+program
+	.command("off")
+	.addArgument(new Argument("[all]", "turn off all lights"))
+	.description("Turn off selected light")
+	.action((all) => toggleLightOnCommand(false, all));
+
 // Example - No args
 // program
 // 	.command("current")
@@ -19,7 +38,7 @@ const { program, Argument } = require("commander");
 // 	)
 // 	.action(resetZendeskCommand);
 
-// Example - optiona; args
+// Example - optional args
 // program
 // 	.command("logoutUsers")
 // 	.addArgument(new Argument("[userId]", "id of user to log out"))
