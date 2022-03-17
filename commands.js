@@ -7,8 +7,47 @@ const {
 	askQuestion,
 	commandConfirmed,
 	getBaseAPIRoute,
-	toggleLightsWithIds,
+	updateLightStates,
 } = require("./utils");
+
+const toggleLightBrightnessCommand = async (brightness, all) => {
+	// Check that CLI is configured
+	const BASEROUTE = getBaseAPIRoute();
+	if (!BASEROUTE) return;
+
+	// Get list of lights
+	const lightOptions = await getLights();
+
+	// If "all" is specified in args, turn on/off all lights
+	if (all) {
+		const lightIds = lightOptions.map((light) => light.id);
+		return updateLightStates(lightIds, "bri", brightness);
+	}
+
+	// Format Question
+	const question = {
+		type: "list",
+		name: "light",
+		message: `Choose which lights to turn ${
+			brightness === 0 ? "dim" : "brighten"
+		}`,
+		choices: lightOptions.map((light) => light.label).concat("All"),
+	};
+
+	// Ask user which light to dim/brighten
+	inquirer.prompt(question).then((answers) => {
+		const lightName = answers.light;
+		const lightId = lightName.split("-")[0].trim();
+
+		// Update light(s)
+		if (lightId === "All") {
+			const lightIds = lightOptions.map((light) => light.id);
+			updateLightStates(lightIds, "bri", brightness);
+		} else {
+			updateLightStates([lightId], "bri", brightness);
+		}
+	});
+};
 
 const toggleLightOnCommand = async (on, all) => {
 	// Check that CLI is configured
@@ -21,7 +60,7 @@ const toggleLightOnCommand = async (on, all) => {
 	// If "all" is specified in args, turn on/off all lights
 	if (all) {
 		const lightIds = lightOptions.map((light) => light.id);
-		return toggleLightsWithIds(lightIds, on);
+		return updateLightStates(lightIds, "on", on);
 	}
 
 	// Format Question
@@ -40,9 +79,9 @@ const toggleLightOnCommand = async (on, all) => {
 		// Turn off light(s)
 		if (lightId === "All") {
 			const lightIds = lightOptions.map((light) => light.id);
-			toggleLightsWithIds(lightIds, on);
+			updateLightStates(lightIds, "on", on);
 		} else {
-			toggleLightsWithIds([lightId], on);
+			updateLightStates([lightId], "on", on);
 		}
 	});
 };
@@ -93,4 +132,5 @@ const connectCommand = async () => {
 module.exports = {
 	toggleLightOnCommand,
 	connectCommand,
+	toggleLightBrightnessCommand,
 };

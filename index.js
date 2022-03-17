@@ -2,9 +2,14 @@
 
 // Note - Use `yarn global add file:$PWD` or `yarnSelf` to self-install
 
+const chalk = require("chalk");
 const { program, Argument } = require("commander");
 
-const { toggleLightOnCommand, connectCommand } = require("./commands");
+const {
+	toggleLightOnCommand,
+	connectCommand,
+	toggleLightBrightnessCommand,
+} = require("./commands");
 
 program
 	.command("connect")
@@ -22,6 +27,46 @@ program
 	.addArgument(new Argument("[all]", "turn off all lights"))
 	.description("Turn off selected light")
 	.action((all) => toggleLightOnCommand(false, all));
+
+program
+	.command("dim")
+	.addArgument(new Argument("[all]", "dim all lights"))
+	.option("-l, --light <string>", "specify brightness level (0-255)")
+	.description("Dim selected light")
+	.action((all, options) => {
+		const { light } = options;
+		if (light) {
+			if (!isNaN(light)) {
+				toggleLightBrightnessCommand(parseInt(light), all);
+			} else {
+				console.log(
+					chalk.redBright.bold("Invalid light parameter supplied")
+				);
+			}
+		} else {
+			toggleLightBrightnessCommand(0, all);
+		}
+	});
+
+program
+	.command("bright")
+	.addArgument(new Argument("[all]", "brightemn all lights"))
+	.option("-l, --light", "specify brightness level (0-255)")
+	.description("Brighten selected light")
+	.action((all, options) => {
+		const { light } = options;
+		if (light) {
+			if (!isNaN(light)) {
+				toggleLightBrightnessCommand(parseInt(light), all);
+			} else {
+				console.log(
+					chalk.redBright.bold("Invalid light parameter supplied")
+				);
+			}
+		} else {
+			toggleLightBrightnessCommand(255, all);
+		}
+	});
 
 // Example - No args
 // program

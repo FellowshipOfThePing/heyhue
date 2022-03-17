@@ -66,10 +66,10 @@ const getLights = async () => {
 	}));
 };
 
-const toggleLightsWithIds = (ids, on) => {
+const updateLightStates = (ids, field, value) => {
 	const promises = [];
 	ids.forEach((id) => {
-		promises.push(requestPut(`/lights/${id}/state`, { on }));
+		promises.push(requestPut(`/lights/${id}/state`, { [field]: value }));
 	});
 	Promise.all(promises);
 };
@@ -113,5 +113,5 @@ module.exports = {
 	askQuestion,
 	commandConfirmed,
 	getBaseAPIRoute,
-	toggleLightsWithIds,
+	updateLightStates,
 };
