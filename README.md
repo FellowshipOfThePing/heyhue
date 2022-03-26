@@ -12,25 +12,13 @@
 
 ## Installation
 
-1. Clone the repository
+1. Yarn install from repository
 
     ```bash
-    git clone https://github.com/FellowshipOfThePing/heyhue.git
+    yarn global add https://github.com/FellowshipOfThePing/heyhue
     ```
 
-2. `cd` into the repository's root directory
-
-    ```bash
-    cd heyhue
-    ```
-
-3. Once inside the root directory, install the package globally
-
-    ```bash
-    yarn global add file:$PWD
-    ```
-
-4. Run the `connect` command
+2. Run the `connect` command
 
     ```bash
     hue connect
@@ -38,6 +26,6 @@
 
     > Running this command will prompt you to enter in your Hue Bridge's IP address and a valid username. To find this information, see the [Configuring the CLI](#configuring-the-CLI) section below.
 
-5. Paste in your IP address and username, and hit return
+3. Paste in your IP address and username, and hit return
 
 ## Configuring the CLI
