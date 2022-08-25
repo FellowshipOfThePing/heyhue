@@ -19,18 +19,6 @@ const askQuestion = (query) => {
 	);
 };
 
-const commandConfirmed = async (prompt) => {
-	// Emit prompt
-	console.log(chalk.redBright.bold(`\n${prompt}`));
-	const ans = await askQuestion("(y/N): ");
-
-	// Parse prompt response
-	if (ans && (ans.toLowerCase() === "y" || ans.toLowerCase() === "yes")) {
-		return true;
-	}
-	return false;
-};
-
 const getBaseAPIRoute = () => {
 	// Get credentials from config
 	const config = new Conf();
@@ -107,11 +95,8 @@ const requestPut = async (endpoint, body, requireBaseRoute = true) => {
 };
 
 module.exports = {
-	requestGet,
-	requestPut,
 	getLights,
 	askQuestion,
-	commandConfirmed,
 	getBaseAPIRoute,
 	updateLightStates,
 };

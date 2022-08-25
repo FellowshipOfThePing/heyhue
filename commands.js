@@ -1,14 +1,68 @@
 const inquirer = require("inquirer");
 const Conf = require("conf");
 const chalk = require("chalk");
+const { discovery, api } = require("node-hue-api");
 
 const {
 	getLights,
 	askQuestion,
-	commandConfirmed,
 	getBaseAPIRoute,
 	updateLightStates,
 } = require("./utils");
+
+const findHueBridgeIP = async () => {
+	const discoveryResults = await discovery.nupnpSearch();
+
+	if (discoveryResults.length === 0) {
+		console.log(chalk.redBright.bold("Failed to find any Hue Bridges"));
+		return null;
+	} else {
+		// Ignoring that you could have more than one Hue Bridge on a network as this is unlikely in 99.9% of users situations
+		return discoveryResults[0].ipaddress;
+	}
+};
+
+const connectCommand = async () => {
+	// Ask for IP
+	console.log(chalk.green.bold("Detecting IP Address..."));
+	const ipAddress = await findHueBridgeIP();
+	if (!ipAddress) return;
+
+	// Save new IP
+	const config = new Conf();
+	config.set("IP_ADDRESS", ipAddress);
+	console.log(chalk.green.bold(`Hue Bridge Found: ${ipAddress}`));
+
+	// Create SDK instance of API (unauthenticated)
+	const unauthenticatedApi = await api.createLocal(ipAddress).connect();
+
+	// Emit prompt
+	console.log(
+		chalk.blueBright.bold(
+			"\nPress the Link button on your Hue Bridge, then press enter on your keyboard."
+		)
+	);
+	await askQuestion("...");
+
+	let createdUser;
+	try {
+		// Create Hue User
+		createdUser = await unauthenticatedApi.users.createUser(
+			"hey-hue",
+			"hey-hue-client"
+		);
+		config.set("USERNAME", createdUser.username);
+		console.log(chalk.green.bold("Successfully connected to Hue Bridge"));
+	} catch (err) {
+		if (err.getHueErrorType() === 101) {
+			console.error(
+				"The Link button on the bridge was not pressed. Please press the Link button and try again."
+			);
+		} else {
+			console.error(`Unexpected Error: ${err.message}`);
+		}
+	}
+};
 
 const toggleLightBrightnessCommand = async (brightness, all) => {
 	// Check that CLI is configured
@@ -84,49 +138,6 @@ const toggleLightOnCommand = async (on, all) => {
 			updateLightStates([lightId], "on", on);
 		}
 	});
-};
-
-const connectCommand = async () => {
-	// Check if IP already exists in Conf store
-	const config = new Conf();
-	let settingNewIp = true;
-	if (config.get("IP_ADDRESS", null)) {
-		const confirmed = await commandConfirmed(
-			"You already have an IP address saved. Do you want to replace it?"
-		);
-		if (!confirmed) settingNewIp = false;
-	}
-
-	if (settingNewIp) {
-		// Ask for IP
-		const ipAddress = await askQuestion(
-			"Please enter the IP Address of your Hue Bridge: "
-		);
-
-		// Save new IP
-		config.set("IP_ADDRESS", ipAddress);
-		console.log(chalk.green.bold("New IP Saved!"));
-	}
-
-	// Check if username already exists in Conf store
-	let settingNewUsername = true;
-	if (config.get("USERNAME", null)) {
-		const confirmed = await commandConfirmed(
-			"You already have a username saved. Do you want to replace it?"
-		);
-		if (!confirmed) settingNewUsername = false;
-	}
-
-	if (settingNewUsername) {
-		// Ask for username
-		const username = await askQuestion(
-			"Please enter an authorized username: "
-		);
-
-		// Save new IP
-		config.set("USERNAME", username);
-		console.log(chalk.green.bold("Username Saved!"));
-	}
 };
 
 module.exports = {
