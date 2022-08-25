@@ -7,7 +7,7 @@
 ## Commands
 
 -   `connect`
--   `off [all]`
+-   `on [all]`
 -   `off [all]`
 
 ## Installation
@@ -24,8 +24,4 @@
     hue connect
     ```
 
-    > Running this command will prompt you to enter in your Hue Bridge's IP address and a valid username. To find this information, see the [Configuring the CLI](#configuring-the-CLI) section below.
-
-3. Paste in your IP address and username, and hit return
-
-## Configuring the CLI
+    > This command will prompt you to press the button on your Hue Bridge, so make sure it's nearby before running it.
